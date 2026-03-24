@@ -6,8 +6,7 @@
   "scripts": {
     "dev": "nodemon index.js",
     "start": "node index.js"
-}
-,
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -18,7 +17,6 @@
     "express": "^5.2.1"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14",
-    "prisma": "^7.5.0"
+    "nodemon": "^3.1.14"
   }
 }
