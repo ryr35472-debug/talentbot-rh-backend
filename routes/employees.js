@@ -16,6 +16,10 @@ router.post(
     body("position")
       .notEmpty()
       .withMessage("position es obligatorio"),
+    body("department_id")
+      .optional()
+      .isInt({ min: 1 })
+      .withMessage("department_id debe ser un entero positivo"),
     body("salary")
       .optional()
       .isNumeric()
@@ -32,13 +36,13 @@ router.post(
     }
 
     try {
-      const { full_name, email, position, department, salary } = req.body;
+      const { full_name, email, position, department_id, salary } = req.body;
 
       const result = await pool.query(
-        `INSERT INTO employees (full_name, email, position, department, salary)
+        `INSERT INTO employees (full_name, email, position, department_id, salary)
          VALUES ($1, $2, $3, $4, $5)
          RETURNING *`,
-        [full_name, email, position, department, salary]
+        [full_name, email, position, department_id || null, salary]
       );
 
       res.status(201).json({
@@ -59,8 +63,19 @@ router.post(
 router.get("/", async (req, res) => {
   try {
     const result = await pool.query(`
-      SELECT * FROM employees
-      ORDER BY id DESC
+      SELECT
+        e.id,
+        e.full_name,
+        e.email,
+        e.position,
+        e.salary,
+        e.created_at,
+        e.department_id,
+        d.name AS department_name
+      FROM employees e
+      LEFT JOIN departments d
+        ON e.department_id = d.id
+      ORDER BY e.id DESC
     `);
 
     res.json({
@@ -98,7 +113,19 @@ router.get(
       const { id } = req.params;
 
       const result = await pool.query(
-        "SELECT * FROM employees WHERE id = $1",
+        `SELECT
+           e.id,
+           e.full_name,
+           e.email,
+           e.position,
+           e.salary,
+           e.created_at,
+           e.department_id,
+           d.name AS department_name
+         FROM employees e
+         LEFT JOIN departments d
+           ON e.department_id = d.id
+         WHERE e.id = $1`,
         [id]
       );
 
@@ -139,6 +166,10 @@ router.put(
     body("position")
       .notEmpty()
       .withMessage("position es obligatorio"),
+    body("department_id")
+      .optional()
+      .isInt({ min: 1 })
+      .withMessage("department_id debe ser un entero positivo"),
     body("salary")
       .optional()
       .isNumeric()
@@ -156,18 +187,18 @@ router.put(
 
     try {
       const { id } = req.params;
-      const { full_name, email, position, department, salary } = req.body;
+      const { full_name, email, position, department_id, salary } = req.body;
 
       const result = await pool.query(
         `UPDATE employees
          SET full_name = $1,
              email = $2,
              position = $3,
-             department = $4,
+             department_id = $4,
              salary = $5
          WHERE id = $6
          RETURNING *`,
-        [full_name, email, position, department, salary, id]
+        [full_name, email, position, department_id || null, salary, id]
       );
 
       if (result.rows.length === 0) {
