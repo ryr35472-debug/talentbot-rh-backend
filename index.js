@@ -120,6 +120,18 @@ app.get('/employees', async (req, res) => {
   }
 });
 
+{
+  "ok": true,
+  "employee": {
+    "id": 1,
+    "full_name": "Juan Perez",
+    "email": "juanperez@gmail.com",
+    "position": "Asistente RRHH",
+    "department": "Recursos Humanos",
+    "salary": "650.00",
+    "created_at": "2026-03-25T01:58:03.397Z"
+  }
+}
 
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en puerto ${PORT}`);
