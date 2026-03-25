@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const { Pool } = require("pg");
+const { body, validationResult } = require("express-validator");
 require("dotenv").config();
 
 const app = express();
@@ -76,32 +77,59 @@ app.get("/init-db", async (req, res) => {
   }
 });
 
-app.post("/employees", async (req, res) => {
-  try {
-    const { full_name, email, position, department, salary } = req.body;
+app.post(
+  "/employees",
+  [
+    body("full_name")
+      .notEmpty()
+      .withMessage("full_name es obligatorio"),
+    body("email")
+      .isEmail()
+      .withMessage("email inválido"),
+    body("position")
+      .notEmpty()
+      .withMessage("position es obligatorio"),
+    body("salary")
+      .optional()
+      .isNumeric()
+      .withMessage("salary debe ser numérico")
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
 
-    const query = `
-      INSERT INTO employees (full_name, email, position, department, salary)
-      VALUES ($1, $2, $3, $4, $5)
-      RETURNING *
-    `;
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        ok: false,
+        errors: errors.array()
+      });
+    }
 
-    const values = [full_name, email, position, department, salary];
-    const result = await pool.query(query, values);
+    try {
+      const { full_name, email, position, department, salary } = req.body;
 
-    res.status(201).json({
-      ok: true,
-      employee: result.rows[0]
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      ok: false,
-      message: "Error creando empleado",
-      error: error.message
-    });
+      const query = `
+        INSERT INTO employees (full_name, email, position, department, salary)
+        VALUES ($1, $2, $3, $4, $5)
+        RETURNING *
+      `;
+
+      const values = [full_name, email, position, department, salary];
+      const result = await pool.query(query, values);
+
+      res.status(201).json({
+        ok: true,
+        employee: result.rows[0]
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        ok: false,
+        message: "Error creando empleado",
+        error: error.message
+      });
+    }
   }
-});
+);
 
 app.get("/employees", async (req, res) => {
   try {
