@@ -37,6 +37,7 @@ app.get("/db-test", async (req, res) => {
       data: result.rows[0]
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       ok: false,
       message: "Error conectando a PostgreSQL",
@@ -66,6 +67,7 @@ app.get("/init-db", async (req, res) => {
       message: "Tabla employees recreada correctamente"
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       ok: false,
       message: "Error creando tabla employees",
@@ -92,6 +94,7 @@ app.post("/employees", async (req, res) => {
       employee: result.rows[0]
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       ok: false,
       message: "Error creando empleado",
@@ -112,6 +115,7 @@ app.get("/employees", async (req, res) => {
       data: result.rows
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       ok: false,
       message: "Error listando empleados",
@@ -120,6 +124,6 @@ app.get("/employees", async (req, res) => {
   }
 });
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Servidor corriendo en puerto ${PORT}`);
+app.listen(process.env.PORT || 3000, '0.0.0.0', () => {
+  console.log(`Servidor corriendo en puerto ${process.env.PORT || 3000}`);
 });
