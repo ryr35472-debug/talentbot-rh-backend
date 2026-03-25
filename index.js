@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { Pool } = require('pg');
+const { Pool } = require("pg");
 require("dotenv").config();
 
 const app = express();
@@ -20,34 +20,34 @@ app.get("/", (req, res) => {
   });
 });
 
-app.get('/health', (req, res) => {
+app.get("/health", (req, res) => {
   res.json({
     ok: true,
-    status: 'healthy',
-    service: 'rh-backend'
+    status: "healthy",
+    service: "rh-backend"
   });
 });
 
-app.get('/db-test', async (req, res) => {
+app.get("/db-test", async (req, res) => {
   try {
-    const result = await pool.query('SELECT NOW() as server_time');
+    const result = await pool.query("SELECT NOW() as server_time");
     res.json({
       ok: true,
-      message: 'Conexión a PostgreSQL exitosa',
+      message: "Conexión a PostgreSQL exitosa",
       data: result.rows[0]
     });
   } catch (error) {
     res.status(500).json({
       ok: false,
-      message: 'Error conectando a PostgreSQL',
+      message: "Error conectando a PostgreSQL",
       error: error.message
     });
   }
 });
 
-app.get('/init-db', async (req, res) => {
+app.get("/init-db", async (req, res) => {
   try {
-    await pool.query(`DROP TABLE IF EXISTS employees`);
+    await pool.query("DROP TABLE IF EXISTS employees");
 
     await pool.query(`
       CREATE TABLE employees (
@@ -63,18 +63,18 @@ app.get('/init-db', async (req, res) => {
 
     res.json({
       ok: true,
-      message: 'Tabla employees recreada correctamente'
+      message: "Tabla employees recreada correctamente"
     });
   } catch (error) {
     res.status(500).json({
       ok: false,
-      message: 'Error creando tabla employees',
+      message: "Error creando tabla employees",
       error: error.message
     });
   }
 });
 
-app.post('/employees', async (req, res) => {
+app.post("/employees", async (req, res) => {
   try {
     const { full_name, email, position, department, salary } = req.body;
 
@@ -94,13 +94,13 @@ app.post('/employees', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       ok: false,
-      message: 'Error creando empleado',
+      message: "Error creando empleado",
       error: error.message
     });
   }
 });
 
-app.get('/employees', async (req, res) => {
+app.get("/employees", async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT * FROM employees
@@ -114,25 +114,12 @@ app.get('/employees', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       ok: false,
-      message: 'Error listando empleados',
+      message: "Error listando empleados",
       error: error.message
     });
   }
 });
 
-{
-  "ok": true,
-  "employee": {
-    "id": 1,
-    "full_name": "Juan Perez",
-    "email": "juanperez@gmail.com",
-    "position": "Asistente RRHH",
-    "department": "Recursos Humanos",
-    "salary": "650.00",
-    "created_at": "2026-03-25T01:58:03.397Z"
-  }
-}
-
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`Servidor corriendo en puerto ${PORT}`);
 });
