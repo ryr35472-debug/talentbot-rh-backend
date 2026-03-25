@@ -47,8 +47,10 @@ app.get('/db-test', async (req, res) => {
 
 app.get('/init-db', async (req, res) => {
   try {
+    await pool.query(`DROP TABLE IF EXISTS employees`);
+
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS employees (
+      CREATE TABLE employees (
         id SERIAL PRIMARY KEY,
         full_name VARCHAR(120) NOT NULL,
         email VARCHAR(120) UNIQUE NOT NULL,
@@ -61,7 +63,7 @@ app.get('/init-db', async (req, res) => {
 
     res.json({
       ok: true,
-      message: 'Tabla employees creada correctamente'
+      message: 'Tabla employees recreada correctamente'
     });
   } catch (error) {
     res.status(500).json({
