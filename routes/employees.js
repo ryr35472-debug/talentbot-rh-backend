@@ -104,24 +104,40 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get(
+  "/:id",
+  [
+    param("id")
+      .isInt({ min: 1 })
+      .withMessage("id debe ser un entero positivo")
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        ok: false,
+        errors: errors.array()
+      });
+    }
 
     try {
       const { id } = req.params;
 
       const result = await pool.query(
         `SELECT
-           e.id,
-           e.full_name,
-           e.email,
-           e.position,
-           e.salary,
-           e.created_at,
-           e.department_id,
-           d.name AS department_name
-         FROM employees e
-         LEFT JOIN departments d
-           ON e.department_id = d.id
-         WHERE e.id = $1`,
+          e.id,
+          e.full_name,
+          e.email,
+          e.position,
+          e.salary,
+          e.created_at,
+          e.department_id,
+          d.name AS department_name
+        FROM employees e
+        LEFT JOIN departments d
+          ON e.department_id = d.id
+        WHERE e.id = $1`,
         [id]
       );
 
