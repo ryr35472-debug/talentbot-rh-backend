@@ -59,6 +59,7 @@ router.post(
   }
 );
 
+
 router.get("/", async (req, res) => {
   try {
     await ensureDepartmentsTable();
@@ -77,6 +78,37 @@ router.get("/", async (req, res) => {
     res.status(500).json({
       ok: false,
       message: "Error listando departamentos",
+      error: error.message
+    });
+  }
+});
+
+router.get("/stats", async (req, res) => {
+  try {
+    await ensureDepartmentsTable();
+
+    const result = await pool.query(`
+      SELECT
+        d.id,
+        d.name,
+        d.description,
+        COUNT(e.id) AS employees_count
+      FROM departments d
+      LEFT JOIN employees e
+        ON e.department_id = d.id
+      GROUP BY d.id, d.name, d.description
+      ORDER BY d.id DESC
+    `);
+
+    res.json({
+      ok: true,
+      data: result.rows
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      ok: false,
+      message: "Error obteniendo estadísticas de departamentos",
       error: error.message
     });
   }

@@ -62,7 +62,9 @@ router.post(
 
 router.get("/", async (req, res) => {
   try {
-    const result = await pool.query(`
+    const { department_id } = req.query;
+
+    let query = `
       SELECT
         e.id,
         e.full_name,
@@ -75,8 +77,18 @@ router.get("/", async (req, res) => {
       FROM employees e
       LEFT JOIN departments d
         ON e.department_id = d.id
-      ORDER BY e.id DESC
-    `);
+    `;
+
+    const values = [];
+
+    if (department_id) {
+      query += ` WHERE e.department_id = $1`;
+      values.push(department_id);
+    }
+
+    query += ` ORDER BY e.id DESC`;
+
+    const result = await pool.query(query, values);
 
     res.json({
       ok: true,
@@ -92,22 +104,6 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get(
-  "/:id",
-  [
-    param("id")
-      .isInt({ min: 1 })
-      .withMessage("id debe ser un entero positivo")
-  ],
-  async (req, res) => {
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        ok: false,
-        errors: errors.array()
-      });
-    }
 
     try {
       const { id } = req.params;
